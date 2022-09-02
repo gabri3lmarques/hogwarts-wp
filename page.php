@@ -55,6 +55,7 @@
             wp_list_pages([
               'title_li' => NULL,
               'child_of' => $find_child_of,
+              'sort_column' => 'menu_order'
             ]);
           ?>
         </ul>
