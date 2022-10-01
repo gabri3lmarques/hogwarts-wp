@@ -19,3 +19,72 @@ function hogwarts_features() {
 
 add_action('after_setup_theme', 'hogwarts_features');
 
+function theme_post_types(){
+  // event post type
+  register_post_type('event', [
+    'supports' => ['title', 'editor', 'excerpt'],
+    'has_archive' => true,
+    'rewrite' => [
+      'slug' => 'events'
+    ],
+    'public' => true,
+    'labels' => [
+      'name' => 'Events',
+      'add_new_item' => 'Add New Event',
+      'edit_item' => 'Edit event',
+      'all_items' => 'All events',
+      'singular_name' => 'Event',
+    ],
+    'show_in_rest' => true,
+    'menu_icon' => 'dashicons-calendar'
+  ]);
+  //program post type
+  register_post_type('program', [
+    'supports' => ['title', 'editor'],
+    'has_archive' => true,
+    'rewrite' => [
+      'slug' => 'programs'
+    ],
+    'public' => true,
+    'labels' => [
+      'name' => 'Programs',
+      'add_new_item' => 'Add New Program',
+      'edit_item' => 'Edit program',
+      'all_items' => 'All programs',
+      'singular_name' => 'Program',
+    ],
+    'show_in_rest' => true,
+    'menu_icon' => 'dashicons-awards'
+  ]);
+}
+
+add_action('init','theme_post_types');
+
+add_shortcode('wep_dev', function(){
+  return get_current_user_id();
+});
+
+function theme_adjust_queries($query){
+  if(!is_admin() && is_post_type_archive('event') && is_main_query()){
+    $query->set('posts_per_page', '-1');
+    $query->set('meta_key','event_date');
+    $query->set('orderby','meta_value_num');
+    $query->set('order', 'ASC');
+    $query->set('meta_query', [
+      [
+        'key' => 'event_date',
+        'compare' => '>=',
+        'value' => date('Ymd'),
+        'type' => 'numeric'                
+      ]
+    ]);
+  }
+  if(!is_admin() && is_post_type_archive('program') && is_main_query()){
+    $query->set('orderby', 'title');
+    $query->set('order', 'ASC');
+    $query->set('posts_per_page', -1);
+  }
+}
+
+add_action('pre_get_posts', 'theme_adjust_queries');
+
